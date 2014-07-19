@@ -1,0 +1,96 @@
+#	$OpenBSD: sshd_config,v 1.93 2014/01/10 05:59:19 djm Exp $
+
+# special configuration for daemon instance used for web authentication.
+
+# {{{ avoid conflicts with normal sshd
+# (some of these will also enable running as non-root)
+
+# NOTE: some of this can wait -- the logging nonsense and the chroot are second
+# order issues.  sshd is usually run as root; it isn't a huge issue to do so.
+
+Port 31337
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+# For testing, listen only on localhost:
+ListenAddress 127.0.0.1
+ListenAddress ::1
+PidFile /tmp/.sshd.pid
+
+# FIXME: get the logging sent to user-owned file.
+
+# use an alternate set of keys, since we're not root:
+# HostKeys for protocol version 2
+HostKey /home/wes/repos/projects/webauth-ssh/ssh-conf/key-dsa
+HostKey /home/wes/repos/projects/webauth-ssh/ssh-conf/key-ecdsa
+HostKey /home/wes/repos/projects/webauth-ssh/ssh-conf/key-rsa
+HostKey /home/wes/repos/projects/webauth-ssh/ssh-conf/key-ed25519
+
+# }}}
+
+# {{{ Managing the load
+
+#LoginGraceTime 2m
+#StrictModes yes
+#MaxAuthTries 6
+MaxSessions 3
+#MaxStartups 10:30:100
+#TCPKeepAlive yes
+ClientAliveInterval 10
+ClientAliveCountMax 3
+
+# }}}
+
+# {{{ fancy authorized_keys command
+
+# NOTE: AuthorizedKeysCommand assumes all the users have an account
+# of some sort on the system, which I don't realy want.  Hence we
+# resort to the patched openssh-for-git.
+# AuthorizedKeysCommand /usr/local/bin/authorized_keys.sh
+# AuthorizedKeysCommandUser wes
+# AuthorizedKeysFile	/dev/null
+AuthorizedKeysScript /home/wes/repos/projects/webauth-ssh/ssh-conf/authorized_keys_script.sh
+# AuthorizedKeysFile	.ssh/authorized_keys
+AuthorizedKeysFile	/tmp/empty
+# at least in old version of ssh, can't use /dev/null since it is not
+# a regular file.  Point to something read-only and empty.
+# }}}
+
+# {{{ on lock down like a penitentiary...
+
+#PubkeyAuthentication yes
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+PermitRootLogin no
+# NOTE: old ssh does not have an option to disable tty's in the config
+# file, so you have to do this via the options in authorized_keys
+# PermitTTY no
+#PermitUserEnvironment no
+#PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+# UsePrivilegeSeparation sandbox
+UsePrivilegeSeparation no
+AllowUsers wes
+
+#ChrootDirectory none
+
+# }}}
+
+# {{{ misc.
+
+PrintMotd no
+#PrintLastLog yes
+
+# }}}
+
+# {{{ queue
+
+# Logging
+# obsoletes QuietMode and FascistLogging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+# }}}
+
+# vim:ft=sshdconfig

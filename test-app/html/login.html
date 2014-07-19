@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>SSH Test</title>
+    <meta charset="UTF-8" />
+	<script type="text/javascript" src="/js/ssh-login.js"></script>
+  </head>
+  <body>
+	<textarea rows="3" cols="50" id="msgtosend">
+user:wes
+port:31337
+	</textarea><br />
+	<input type="button" id="rqbutton" disabled="true" onclick="sendMsg()"
+	value="request token" /><br />
+	<textarea rows="5" cols="50" id="msgrecvd"> </textarea>
+	<br />
+	<input type="button" id="closebtn" value="close connection" onclick="closeCnx()" />
+  </body>
+</html>
