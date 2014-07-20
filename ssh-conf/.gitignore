@@ -1,2 +1,6 @@
 key-*
 db-of-keys
+authorized_keys_script.sh
+empty
+sshd_config
+start-sshd.sh

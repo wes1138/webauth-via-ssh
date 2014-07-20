@@ -2,7 +2,7 @@
 
 read -t1 KEY
 
-database='/home/wes/repos/projects/webauth-ssh/ssh-conf/db-of-keys'
+database=@FLATFILE
 # lines in our flat file are just like openssh authorized_keys.  So there's
 # the type, then the key, then a comment, which we use as the username.
 user=""
@@ -24,5 +24,7 @@ if [[ -z $user ]]; then
 	echo $KEY $user >> $database
 fi
 
-echo -n "command=\"/tmp/token-gen -u '$user'\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty"
+tokengen=@TOKENGEN
+sshopts=@SSHOPTS
+echo -n "command=\"$tokengen -u '$user'\",$sshopts"
 exit 0

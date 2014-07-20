@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# NOTE: we unfortunately have to use -q for old openssh 5.1, as it may
+# print some debugging information to stdout, compromising the token!!
+@PATCHEDSSHD -f sshd_config -e -q -D
+# @PATCHEDSSHD -f sshd_config -e -D
