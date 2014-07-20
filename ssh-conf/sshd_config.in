@@ -1,0 +1,77 @@
+# special configuration for daemon instance used for web authentication.
+
+# {{{ avoid conflicts with normal sshd
+# (some of these will also enable running as non-root)
+
+Port 31337
+#AddressFamily any
+ListenAddress @LISTEN_ADDRv4
+ListenAddress @LISTEN_ADDRv6
+PidFile @PID_FILE
+
+# use an alternate set of keys, since we're not root:
+# HostKeys for protocol version 2
+@HOSTKEYS
+
+# }}}
+
+# {{{ Managing the load
+
+#LoginGraceTime 2m
+#StrictModes yes
+#MaxAuthTries 6
+MaxSessions 3
+#MaxStartups 10:30:100
+#TCPKeepAlive yes
+ClientAliveInterval 10
+ClientAliveCountMax 3
+
+# }}}
+
+# {{{ authorized_keys script
+
+# NOTE: AuthorizedKeysCommand assumes all the users have an account
+# of some sort on the system, which isn't convenient.  Hence we
+# resort to the patched openssh-for-git.
+AuthorizedKeysScript @AKSCRIPT
+AuthorizedKeysFile @EMPTYAUTHKEYS
+# }}}
+
+# {{{ on lock down like a penitentiary...
+
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+PermitRootLogin no
+# PermitTTY no
+# NOTE: old ssh does not have an option to disable tty's in this config,
+# so we must do the above via the options returned by the script.
+PermitUserEnvironment no
+PermitTunnel no
+AllowAgentForwarding no
+AllowTcpForwarding no
+# UsePrivilegeSeparation sandbox
+# we won't assume a special sshd user:
+UsePrivilegeSeparation no
+AllowUsers @SSH_USER
+
+# }}}
+
+# {{{ misc.
+
+PrintMotd no
+#PrintLastLog yes
+
+# }}}
+
+# {{{ maybe of interest at some point
+
+# Logging
+# obsoletes QuietMode and FascistLogging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+#ChrootDirectory none
+
+# }}}
+
+# vim:ft=sshdconfig

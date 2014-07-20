@@ -13,9 +13,6 @@ using std::map;
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 
-/* XXX find a better way to reference the path */
-#define HTMLPATH "/home/wes/repos/projects/webauth-ssh/test-app/html/"
-
 #define AUTH_COOKIE_NAME "auth-token="
 
 map<string,string> data;
@@ -44,7 +41,6 @@ void initialize(void)
 {
 	fileToString(HTMLPATH"login.html",&loginHtml);
 	count=0;
-	data["lolol"] = "the data for lolol, yo";
 }
 
 /* this relies on stdio.h, so we have to place it in its

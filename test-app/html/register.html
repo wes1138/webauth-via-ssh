@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<style type="text/css">
+    body {font-family:Gill Sans MT; font-size:larger; color:#657b83; background-color:#fdf6e3;}
+    h2 {margin-bottom:0px; padding-bottom:0px;}
+    a:link {color:#859900}
+    a:visited {color:#6c71c4}
+    a:hover {color:#268bd2}
+    a:active {color:#d33682}
+    
+    .required{color:#268bd2; font-style:italic; font-weight:bold;}
+    .optional{}
+    .redstuff{color:#dc322f;}
+    .emph2{color:#6c71c4; font-weight:bolder;}
+    .emph{color:#859900; font-weight:bolder;}
+    
+    .inputbox{background-color:#eee8d5; color:#586e75; font-family:Gill Sans MT; font-weight:bolder;}
+</style>
+
+<title>SSH Authentication Test -- Create Account</title>
+</head>
+<body>
+
+<h1>SSH Authentication Test</h1>
+
+<h2 style="text-align: justify">Create New Account:</h2>
+<br />
+<form action="" name="sform">
+<table>
+<tr>
+<td align="right"><span class="required">User ID:</span> </td>
+<td><input class="inputbox" type="text" name="userid" /> </td>
+</tr>
+<tr>
+<td align="right"><span class="required">Public Key:</span></td>
+<td><textarea class="inputbox" name="PK" rows="10" cols="60" onfocus="this.select();">
+(Please use openssh authorized_keys format)</textarea> </td>
+</tr>
+
+<tr>
+<td />
+<td><input type="button"
+	onclick="closeCnx()"
+	value="Create Account" />
+</td>
+</tr>
+</table>
+</form>
+
+</body>
+</html>

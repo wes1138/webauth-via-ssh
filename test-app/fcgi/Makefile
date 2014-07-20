@@ -11,13 +11,14 @@ CXX     := g++
 LDFLAGS := $(LDFLAGS)
 LDADD   :=  -lfcgi -lcrypto -lssl
 INCLUDE :=  # -I../path/to/headers/
-DEFS    :=  # -DLINUX
+# NOTE: you should run make from this directory, else the following
+# may not work.
+DEFS    := -DHTMLPATH=\"$(shell pwd)/../html/\"
 
 TARGET  := main.fcgi
-HELLO   := hello.fcgi
 
 .PHONY : all
-all : $(TARGET) $(HELLO)
+all : $(TARGET)
 
 # {{{ for debugging
 DBGFLAGS := -g
