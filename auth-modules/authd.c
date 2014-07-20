@@ -102,6 +102,9 @@ struct per_session_data__auth {
  * be good for looking up keys, or for signup?  However, we can make
  * the signup via a static file for now.  Outside the scope? */
 
+/* store the origin header, and the corresponding websocket: */
+char origin[1024]; /* who is connecting to us? */
+struct libwebsocket* origin_ws;
 static int
 callback_acquire(struct libwebsocket_context *context,
 		struct libwebsocket *wsi,
@@ -111,23 +114,25 @@ callback_acquire(struct libwebsocket_context *context,
 	struct per_session_data__auth *psd = (struct per_session_data__auth *)user;
 	int n;
 	FILE* tsshconf;
-	char origin[1024]; /* who is connecting to us? */
+	char headerbuf[1024];
 
 	switch (reason) {
 
 	case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
 		fprintf(stderr, "During FILTER_PROTOCOL_CONNECTION callback:\n");
-		bzero(origin,1024);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_ORIGIN);
-		fprintf(stderr, "WSI_TOKEN_ORIGIN: %s.\n",origin);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_SWORIGIN);
-		fprintf(stderr, "WSI_TOKEN_SWORIGIN: %s.\n",origin);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_HOST);
-		fprintf(stderr, "WSI_TOKEN_HOST: %s.\n",origin);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_PROTOCOL);
-		fprintf(stderr, "WSI_TOKEN_PROTOCOL: %s.\n",origin);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_CONNECTION);
-		fprintf(stderr, "WSI_TOKEN_CONNECTION: %s.\n",origin);
+		bzero(headerbuf,1024);
+		lws_hdr_copy(wsi, headerbuf, 1024, WSI_TOKEN_ORIGIN);
+		fprintf(stderr, "WSI_TOKEN_ORIGIN: %s.\n",headerbuf);
+		/* save these for later: */
+		strncpy(origin,headerbuf,1024); origin_ws = wsi;
+		lws_hdr_copy(wsi, headerbuf, 1024, WSI_TOKEN_SWORIGIN);
+		fprintf(stderr, "WSI_TOKEN_SWORIGIN: %s.\n",headerbuf);
+		lws_hdr_copy(wsi, headerbuf, 1024, WSI_TOKEN_HOST);
+		fprintf(stderr, "WSI_TOKEN_HOST: %s.\n",headerbuf);
+		lws_hdr_copy(wsi, headerbuf, 1024, WSI_TOKEN_PROTOCOL);
+		fprintf(stderr, "WSI_TOKEN_PROTOCOL: %s.\n",headerbuf);
+		lws_hdr_copy(wsi, headerbuf, 1024, WSI_TOKEN_CONNECTION);
+		fprintf(stderr, "WSI_TOKEN_CONNECTION: %s.\n",headerbuf);
 		break;
 
 	#if CHECK_STATES
@@ -239,8 +244,15 @@ callback_acquire(struct libwebsocket_context *context,
 		}
 
 		/* get hostname from origin. */
-		bzero(origin,1024);
-		lws_hdr_copy(wsi, origin, 1024, WSI_TOKEN_ORIGIN);
+		if (wsi != origin_ws) {
+			fprintf(stderr, "======> wsi struct changed before callback\n");
+		}
+		/* XXX XXX XXX
+		 * The origin token has at this point been cleared.  So we have
+		 * to record it in the FILTER_PROTOCOL above.  But then we also
+		 * need to make sure the recorded version corresponds to the same
+		 * connection as this one... :\ not very convenient.
+		 * */
 		/* for local host (mainly used for debugging), webkit sets origin
 		 * to file://, and firefox sets origin to be "null". */
 		if (!strncmp(origin,"file://",7) ||
@@ -254,6 +266,9 @@ callback_acquire(struct libwebsocket_context *context,
 			fprintf(stderr, "No protocol specified in origin.\n");
 			hostname = origin;
 		}
+		/* remove the port, if present */
+		char* colon = strchr(hostname,':');
+		if (colon) *colon = 0;
 		/* TODO: read the rfc and make sure these are the only cases
 		 * you have to deal with.  Also need to make sure there aren't
 		 * more url components patched on to the end. */
