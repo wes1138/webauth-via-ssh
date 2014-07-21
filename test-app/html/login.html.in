@@ -7,8 +7,8 @@
   </head>
   <body>
 	<textarea rows="3" cols="50" id="msgtosend">
-user:wes
-port:31337
+user:@SSH_USER@
+port:@PATCHED_SSHD_PORT@
 	</textarea><br />
 	<input type="button" id="rqbutton" disabled="true" onclick="sendMsg()"
 	value="request token" /><br />

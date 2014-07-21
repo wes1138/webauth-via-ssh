@@ -3,17 +3,17 @@ OBJECTS := $(patsubst %.c,%.o,$(SOURCES))
 OBJECTS := $(patsubst %.cpp,%.o,$(OBJECTS))
 HEADERS := $(wildcard *.h include/*.h)
 
-COMMON  := -O2 -Wall -march=native -Wformat=2
-CFLAGS  := $(CFLAGS) $(COMMON)
-CXXFLAGS := $(CXXFLAGS) $(COMMON)
-CC      := gcc
-CXX     := g++
-LD      := $(CC)
-LDFLAGS := $(LDFLAGS) -L/home/wes/repos/others/libwebsockets/build/lib/ \
-	-Wl,-O1,-rpath /home/wes/repos/others/libwebsockets/build/lib/
+# COMMON  := -O2 -Wall -march=native -Wformat=2
+COMMON   := -O2 -Wall -Wformat=2
+CFLAGS   := $(COMMON) @CFLAGS@
+CXXFLAGS := $(COMMON) @CXXFLAGS@
+CC      := @CC@
+CXX     := @CXX@
+LD      := @LD@
+LDFLAGS := $(LDFLAGS) @LWSLDFLAGS@ @LDFLAGS@
 LDADD   := -lssl -lcrypto -lwebsockets -lrt
-INCLUDE := -I/home/wes/repos/others/libwebsockets/lib/
-DEFS    :=  # -DLINUX
+INCLUDE := @LWSCPPFLAGS@ @CPPFLAGS@
+DEFS    := 
 
 TOKENGEN := token-gen
 TOKEND   := tokend

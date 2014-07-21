@@ -3,17 +3,16 @@ OBJECTS := $(patsubst %.c,%.o,$(SOURCES))
 OBJECTS := $(patsubst %.cpp,%.o,$(OBJECTS))
 HEADERS := $(wildcard *.h include/*.h)
 
-COMMON  := -O2 -Wall -march=native
-CFLAGS  := $(CFLAGS) $(COMMON)
-CXXFLAGS := $(CXXFLAGS) $(COMMON)
-CC      := gcc
-CXX     := g++
-LDFLAGS := $(LDFLAGS)
+# COMMON  := -O2 -Wall -march=native
+COMMON  := -O2 -Wall
+CFLAGS  := $(COMMON) @CFLAGS@
+CXXFLAGS := $(COMMON) @CXXFLAGS@
+CC      := @CC@
+CXX     := @CXX@
+LDFLAGS := $(LDFLAGS) @LDFLAGS@
 LDADD   :=  -lfcgi -lcrypto -lssl
-INCLUDE :=  # -I../path/to/headers/
-# NOTE: you should run make from this directory, else the following
-# may not work.
-DEFS    := -DHTMLPATH=\"$(shell pwd)/../html/\"
+INCLUDE :=  @CPPFLAGS@
+DEFS    := -DHTMLPATH=\"@TEST_APP_DIR@/html/\"
 
 TARGET  := main.fcgi
 

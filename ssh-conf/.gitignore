@@ -4,3 +4,4 @@ authorized_keys_script.sh
 empty
 sshd_config
 start-sshd.sh
+Makefile

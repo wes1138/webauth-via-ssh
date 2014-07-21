@@ -3,7 +3,7 @@
 # {{{ avoid conflicts with normal sshd
 # (some of these will also enable running as non-root)
 
-Port 31337
+Port @SSHD_PORT
 #AddressFamily any
 ListenAddress @LISTEN_ADDRv4
 ListenAddress @LISTEN_ADDRv6

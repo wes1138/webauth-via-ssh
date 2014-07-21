@@ -7,7 +7,7 @@ worker_processes  1;
 #error_log  logs/error.log  info;
 
 #pid        logs/nginx.pid;
-pid        /tmp/nginx.pid;
+pid        @NGINX_TMP_DIR@/nginx.pid;
 
 
 events {
@@ -33,11 +33,11 @@ http {
 
     #gzip  on;
 
-	client_body_temp_path /tmp/nginx/client_body;
-	fastcgi_temp_path /tmp/nginx/fastcgi_temp;
-	proxy_temp_path /tmp/nginx/proxy_temp;
-	scgi_temp_path /tmp/nginx/scgi_temp;
-	uwsgi_temp_path /tmp/nginx/uwsgi_temp;
+	client_body_temp_path @NGINX_TMP_DIR@/client_body;
+	fastcgi_temp_path @NGINX_TMP_DIR@/fastcgi_temp;
+	proxy_temp_path @NGINX_TMP_DIR@/proxy_temp;
+	scgi_temp_path @NGINX_TMP_DIR@/scgi_temp;
+	uwsgi_temp_path @NGINX_TMP_DIR@/uwsgi_temp;
 
 
     server {
@@ -48,8 +48,8 @@ http {
         #charset koi8-r;
 
         #access_log  logs/host.access.log  main;
-		access_log /tmp/nginx/ngx-access.log;
-		error_log /tmp/nginx/ngx-error.log;
+		access_log @NGINX_TMP_DIR@/ngx-access.log;
+		error_log @NGINX_TMP_DIR@/ngx-error.log;
 
         location / {
             root   /usr/share/nginx/html;
@@ -63,17 +63,17 @@ http {
 			# TODO: make main, or whatever it ends up being, the only
 			# page out there (don't just direct .fcgi here).
             # fastcgi_pass   127.0.0.1:9000;
-            fastcgi_pass   unix:/tmp/fcgi-sock;
+            fastcgi_pass   unix:@NGINX_TMP_DIR@/fcgi-sock;
             fastcgi_index  main.fcgi;
             include        fastcgi.conf;
         }
 
         location /js {
-            root   /home/wes/repos/projects/webauth-ssh/test-app;
+            root   @TEST_APP_DIR@;
         }
 
         # location /html {
-        #     root   /home/wes/repos/projects/webauth-ssh/test-app;
+        #   root   @TEST_APP_DIR@;
         # }
 
         #error_page  404              /404.html;
