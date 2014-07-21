@@ -1,0 +1,21 @@
+# Top-level Makefile to run other Makefiles...
+
+.PHONY : all
+all :
+	make -C auth-modules/
+	make -C ssh-conf/
+	make -C test-app/fcgi/
+
+
+.PHONY : clean
+clean :
+	make -C auth-modules/  clean
+	make -C ssh-conf/      clean
+	make -C test-app/fcgi/ clean
+
+.PHONY : distclean
+distclean : clean
+	rm -rf autom4te.cache/ config.log config.status configure Makefile
+
+# vim:ft=make:foldmethod=marker:foldmarker={{{,}}}
+

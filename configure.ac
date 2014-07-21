@@ -164,7 +164,8 @@ AC_CONFIG_FILES([auth-modules/Makefile
                  test-app/fcgi/Makefile
 				 test-app/html/login.html
 				 test-app/startnginx.sh
-				 test-app/nginx/nginx.conf])
+				 test-app/nginx/nginx.conf
+				 Makefile])
 AC_OUTPUT
 
 dnl make scripts executable:

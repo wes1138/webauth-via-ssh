@@ -1,4 +1,4 @@
-CONFIGS   := sshd_config empty authorized_keys_script.sh start-sshd.sh
+CONFIGS   := sshd_config empty authorized_keys_script.sh
 KEYS      := key-dsa key-rsa
 # KEYS      := key-dsa key-rsa key-ecdsa key-ed25519
 # make list of "HostKey" strings for later use by sed:
