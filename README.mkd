@@ -38,8 +38,7 @@ Note that:
 Running
 -------
 
-Test Server
-===========
+### Test Server
 
 First start the patched `sshd`.  There is a wrapper script (one-liner to set
 options) at `ssh-conf/start-sshd.sh` which is recommended.  Then start nginx
@@ -49,8 +48,7 @@ either of these scripts, although some features (like logging) will be a
 little strange, or possibly absent.  The service should then be running on
 port 8080.
 
-Client
-======
+### Client
 
 Go to `auth-modules/` and run `./authd`.  **Note:** if you don't have
 ssh-agent running with your key, run `./authd --keyfile=<key>` instead.
@@ -58,8 +56,7 @@ Assuming you already have the server running on this same machine, you can now
 navigate to http://localhost:8080/main.fcgi and you should find the test
 application.
 
-Web Application
-===============
+### Web Application
 
 Upon your first visit, a page with some of the server's ssh info is displayed.
 Press the button to get a token (this will happen via ssh).  If this looks
@@ -81,7 +78,6 @@ TODO
 ----
 
 * Token generating / verifying should be in one module.
-* Test application should run over ssl.
 * Most errors are handled un-gracefully.
 * More configurability.
 
