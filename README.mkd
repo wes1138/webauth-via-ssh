@@ -9,11 +9,11 @@ A proof of concept for using ssh public keys to authenticate to web services.
 Dependencies
 ------------
 
-* [openSSH]
+* [OpenSSH]
 * [OpenSSL]
-* [FCGI] (only needed for test server)
-* [nginx] (only needed for test server)
-* [libwebsockets] (only needed for client)
+* [FCGI] *only needed for test server*
+* [nginx] *only needed for test server*
+* [libwebsockets] *only needed for client*
 
 The server also makes use of a patched sshd, initially created for github:
 https://github.com/norbauer/openssh-for-git
@@ -100,7 +100,7 @@ could of course be sent to an `https://` url and immediately swapped for a new
 token with the above flags set.
 
 
-[openSSH]: http://www.openssh.com/
+[OpenSSH]: http://www.openssh.com/
 [FCGI]: http://www.fastcgi.com/drupal/
 [nginx]: http://nginx.org/
 [OpenSSL]: http://www.openssl.org/
