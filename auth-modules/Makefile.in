@@ -42,6 +42,6 @@ $(TARGETS) : % : %.o
 
 .PHONY : clean
 clean :
-	rm -f $(TARGET) $(OBJECTS)
+	rm -f $(TARGETS) $(OBJECTS)
 
 

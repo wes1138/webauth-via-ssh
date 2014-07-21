@@ -79,7 +79,7 @@ AC_ARG_WITH([libwebsockets],
 	[
 		if test -n "$withval" ; then
 			LOCAL_LIBWS="$withval"
-			LWSLDFLAGS="-L${LOCAL_LIBWS}/build/lib/"
+			LWSLDFLAGS="-L${LOCAL_LIBWS}/build/lib/ -Wl,-O1,-rpath ${LOCAL_LIBWS}/build/lib/"
 			LWSCPPFLAGS="-I${LOCAL_LIBWS}/lib/"
 		fi
 		if ! test -f $LOCAL_LIBWS/build/lib/libwebsockets.so ; then
