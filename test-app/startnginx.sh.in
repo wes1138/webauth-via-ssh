@@ -15,7 +15,7 @@ elif [[ $1 == 'clean' ]]; then
 		echo "nginx is still running. probably bad to rm its files." && \
 		exit 1
 	rm -r @NGINX_TMP_DIR@
-	rm "$keyfile"
+	rm -f "$keyfile"
 else
 	[[ ! -f "$keyfile" ]] && head -c 64 < /dev/urandom > "$keyfile"
 	mkdir -p @NGINX_TMP_DIR@
