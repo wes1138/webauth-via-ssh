@@ -6,6 +6,7 @@
 
 config=@NGINX_CONF_DIR@/nginx.conf
 fcgimain="main.fcgi"
+keyfile="/tmp/.webtoken-key"  # XXX
 if [[ $1 == 'stop' ]]; then
 	nginx -c "$config" -s stop
 	pkill -x "$fcgimain"
@@ -14,7 +15,9 @@ elif [[ $1 == 'clean' ]]; then
 		echo "nginx is still running. probably bad to rm its files." && \
 		exit 1
 	rm -r @NGINX_TMP_DIR@
+	rm "$keyfile"
 else
+	[[ ! -f "$keyfile" ]] && head -c 64 < /dev/urandom > "$keyfile"
 	mkdir -p @NGINX_TMP_DIR@
 	spawn-fcgi -s@NGINX_TMP_DIR@/fcgi-sock -n ./fcgi/$fcgimain &
 	nginx -c "$config"
