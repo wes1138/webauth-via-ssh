@@ -10,7 +10,7 @@ if [[ $1 == 'stop' ]]; then
 	nginx -c "$config" -s stop
 	pkill -x "$fcgimain"
 elif [[ $1 == 'clean' ]]; then
-	[[ -f @NGINX_TMP_DIR/nginx.pid ]] && \
+	[[ -f @NGINX_TMP_DIR@/nginx.pid ]] && \
 		echo "nginx is still running. probably bad to rm its files." && \
 		exit 1
 	rm -r @NGINX_TMP_DIR@

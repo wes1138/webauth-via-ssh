@@ -5,6 +5,7 @@ read -t1 KEY
 database=@FLATFILE
 # lines in our flat file are just like openssh authorized_keys.  So there's
 # the type, then the key, then a comment, which we use as the username.
+[[ ! -f "$database" ]] && touch "$database"
 user=""
 while read line; do
 	IFS=' ' read -a row <<< "$line"
