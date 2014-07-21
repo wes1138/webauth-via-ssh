@@ -22,7 +22,7 @@ window.onload = function() {
 			document.getElementById("msgrecvd").value =
 				"Token acquired :D\n" + token;
 			// set the cookie:
-			document.cookie = "auth-token=" + token;
+			document.cookie = "auth-token=" + token + "; max-age=1800";
 			/* TODO: and now redirect to the main page... */
 		} else if (token.substring(0,2) == "AQ") {
 			document.getElementById("msgrecvd").value =

@@ -1,0 +1,107 @@
+SSH Authentication for Web Services
+===================================
+
+Overview
+--------
+
+A proof of concept for using ssh public keys to authenticate to web services.
+
+Dependencies
+------------
+
+* [openSSH]
+* [OpenSSL]
+* [FCGI] (only needed for test server)
+* [nginx] (only needed for test server)
+* [libwebsockets] (only needed for client)
+
+The server also makes use of a patched sshd, initially created for github:
+https://github.com/norbauer/openssh-for-git
+
+
+Building
+--------
+
+    autoconf
+	./configure [OPTIONS...]
+	make
+
+Note that:
+* There's not an install target right now.
+* `./configure` has some useful options, e.g. setting the path to
+  libwebsockets and the patched version of openssh, neither of which are
+  likely to be globally installed on your system.
+* The Makefiles in each directory are short, easy to read, and contain options
+  for fine-tuning things further.
+
+
+Running
+-------
+
+Test Server
+===========
+
+First start the patched `sshd`.  There is a wrapper script (one-liner to set
+options) at `ssh-conf/start-sshd.sh` which is recommended.  Then start nginx
+and the fast-cgi server via the script `test-app/startnginx.sh`.  **Note:**
+everything has been configured so that root privileges are not required for
+either of these scripts, although some features (like logging) will be a
+little strange, or possibly absent.  The service should then be running on
+port 8080.
+
+Client
+======
+
+Go to `auth-modules/` and run `./authd`.  **Note:** if you don't have
+ssh-agent running with your key, run `./authd --keyfile=<key>` instead.
+Assuming you already have the server running on this same machine, you can now
+navigate to http://localhost:8080/main.fcgi and you should find the test
+application.
+
+Web Application
+===============
+
+Upon your first visit, a page with some of the server's ssh info is displayed.
+Press the button to get a token (this will happen via ssh).  If this looks
+successful, refresh the page, and you will be authenticated and directed to
+your private part of the application.  You can enter text and save it, and it
+will be there for you later (unless you restart the server -- everything is in
+RAM only).  Try it out: close the browser and come back, or clear the tab and
+reload the application in a new one.  You should be given access to your text
+immediately, with no password required.  **This is the main point:** we
+replace passwords (annoying) with ssh public key authentication (awesome).
+
+
+Documentation
+-------------
+
+Will be forthcoming...
+
+TODO
+----
+
+* Token generating / verifying should be in one module.
+* Test application should run over ssl.
+* Most errors are handled un-gracefully.
+* More configurability.
+
+Caveats
+-------
+
+Since this project is a *proof of concept*, attempts have been made to keep it
+*as simple as possible* so as not to obscure the core ideas.  Consequently,
+some important issues have been intentionally ignored, as long as it is clear
+how one would address such issues in real applications.  For example, the
+authentication cookie acquired via the ssh interaction will not have
+`HttpOnly` or `Secure` flags set.  For toying around with this, it is annoying
+to have to set up certificates, and the application logic can be kept simpler
+if we just use the original cookie.  In real applications, the initial cookie
+could of course be sent to an `https://` url and immediately swapped for a new
+token with the above flags set.
+
+
+[openSSH]: http://www.openssh.com/
+[FCGI]: http://www.fastcgi.com/drupal/
+[nginx]: http://nginx.org/
+[OpenSSL]: http://www.openssl.org/
+[libwebsockets]: http://libwebsockets.org/trac/libwebsockets
