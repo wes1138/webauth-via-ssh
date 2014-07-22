@@ -50,7 +50,8 @@ fi
 
 PATCHEDSSHD=""
 AC_ARG_WITH([patched-sshd],
-	[  --with-patched-sshd=xxx Location of sshd patched with authorized_keys_script],
+	[AS_HELP_STRING([--with-patched-sshd=xxx],
+					[location of sshd patched with authorized_keys_script])],
 	[
 		if test -n "$withval" ; then
 			PATCHEDSSHD="$withval"
@@ -61,8 +62,9 @@ AC_SUBST([PATCHEDSSHD])
 
 SSH_USER=`whoami`
 AC_ARG_WITH([ssh-user],
-	[  --with-ssh-user=xxx local user account used to multiplex accounts for
-	 the web application (like the 'git' user at github.)],
+	[AS_HELP_STRING([--with-ssh-user=xxx],
+					[local account used to multiplex accounts for the web
+					 application (like the "git" user at github.)])],
 	[
 		if test -n "$withval" ; then
 			SSH_USER="$withval"
@@ -73,7 +75,8 @@ AC_SUBST([SSH_USER])
 
 PATCHED_SSHD_PORT=31337
 AC_ARG_WITH([sshd-port],
-	[  --with-sshd-port=xxx run patched sshd on this port (default: 31337).],
+	[AS_HELP_STRING([--with-sshd-port=xxx],
+					[run patched sshd on this port (default: 31337)])],
 	[
 		if test -n "$withval" ; then
 			PATCHED_SSHD_PORT="$withval"
@@ -86,7 +89,8 @@ LOCAL_LIBWS=""
 LWSLDFLAGS=""
 LWSCPPFLAGS=""
 AC_ARG_WITH([libwebsockets],
-	[  --with-libwebsockets=xxx path to local source tree],
+	[AS_HELP_STRING([--with-libwebsockets=xxx],
+					[path to local source tree])],
 	[
 		if test -n "$withval" ; then
 			LOCAL_LIBWS="$withval"
@@ -105,8 +109,9 @@ AC_SUBST([LWSCPPFLAGS])
 
 NGINX_TMP_DIR="/tmp/nginx"
 AC_ARG_WITH([nginx-tmp-dir],
-	[  --with-nginx-tmp-dir=xxx path for nginx tempfiles and logs (defaults to
-				 /tmp/nginx/)],
+	[AS_HELP_STRING([--with-nginx-tmp-dir=xxx],
+					[path for nginx tempfiles and logs (defaults to
+					 /tmp/nginx/)])],
 	[
 		if test -n "$withval" ; then
 			NGINX_TMP_DIR="$withval"
@@ -117,7 +122,8 @@ AC_SUBST([NGINX_TMP_DIR])
 
 dnl stole the next few from openSSH.  Thanks guys! :D
 AC_ARG_WITH([cflags],
-	[  --with-cflags           Specify additional flags to pass to compiler],
+	[AS_HELP_STRING([--with-cflags],
+					[Specify additional flags to pass to compiler])],
 	[
 		if test -n "$withval"  &&  test "x$withval" != "xno"  &&  \
 		    test "x${withval}" != "xyes"; then
@@ -126,7 +132,8 @@ AC_ARG_WITH([cflags],
 	]
 )
 AC_ARG_WITH([cppflags],
-	[  --with-cppflags         Specify additional flags to pass to preprocessor] ,
+	[AS_HELP_STRING([--with-cppflags],
+					[Specify additional flags to pass to preprocessor])],
 	[
 		if test -n "$withval"  &&  test "x$withval" != "xno"  &&  \
 		    test "x${withval}" != "xyes"; then
@@ -135,7 +142,8 @@ AC_ARG_WITH([cppflags],
 	]
 )
 AC_ARG_WITH([ldflags],
-	[  --with-ldflags          Specify additional flags to pass to linker],
+	[AS_HELP_STRING([--with-ldflags],
+					[Specify additional flags to pass to linker])],
 	[
 		if test -n "$withval"  &&  test "x$withval" != "xno"  &&  \
 		    test "x${withval}" != "xyes"; then
@@ -143,15 +151,6 @@ AC_ARG_WITH([ldflags],
 		fi
 	]
 )
-dnl AC_ARG_WITH([libs],
-dnl 	[  --with-libs             Specify additional libraries to link with],
-dnl 	[
-dnl 		if test -n "$withval"  &&  test "x$withval" != "xno"  &&  \
-dnl 		    test "x${withval}" != "xyes"; then
-dnl 			LIBS="$LIBS $withval"
-dnl 		fi
-dnl 	]
-dnl )
 
 # assuming configure invoked as ./configure, we save a few useful dirs:
 PROJECT_ROOT=`pwd`
