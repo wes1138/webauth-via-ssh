@@ -11,11 +11,13 @@ Dependencies
 
 * [OpenSSH]
 * [OpenSSL]
-* [FCGI] *only needed for test server*
-* [nginx] *only needed for test server*
-* [libwebsockets] *only needed for client*
+* [libwebsockets]
 
-The server also makes use of a patched sshd, initially created for github:
+### Optional dependencies
+
+Most any fcgi-capable web-server should do, but there are some config files
+and convenience scripts for [nginx] and [spawnfcgi].  Test server needs
+[FCGI], and also makes use of a patched sshd, initially created for github:
 https://github.com/norbauer/openssh-for-git
 
 
@@ -101,3 +103,4 @@ token with the above flags set.
 [nginx]: http://nginx.org/
 [OpenSSL]: http://www.openssl.org/
 [libwebsockets]: http://libwebsockets.org/trac/libwebsockets
+[spawnfcgi]: http://redmine.lighttpd.net/projects/spawn-fcgi/

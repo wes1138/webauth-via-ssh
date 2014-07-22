@@ -36,6 +36,18 @@ dnl AC_FUNC_STRNLEN some crazy how invokes a sequence that will require all
 dnl the standard files like "install.sh", so we leave that out.
 AC_CHECK_FUNCS([bzero memset socket strchr])
 
+dnl look for spawn-fcgi and nginx
+AC_ARG_VAR([SPAWN_FCGI],[path to spawn-fcgi program.])
+AC_PATH_PROG([SPAWN_FCGI],[spawn-fcgi],[missing-spawn-fcgi])
+if test "x$SPAWN_FCGI" = "xmissing-spawn-fcgi" ; then
+	AC_MSG_WARN([could not find spawn-fcgi. some scripts will not work.])
+fi
+AC_ARG_VAR([NGINX_BIN],[path to nginx binary.])
+AC_PATH_PROG([NGINX_BIN],[nginx],[missing-nginx])
+if test "x$NGINX_BIN" = "xmissing-nginx" ; then
+	AC_MSG_WARN([could not find nginx. some scripts will not work.])
+fi
+
 PATCHEDSSHD=""
 AC_ARG_WITH([patched-sshd],
 	[  --with-patched-sshd=xxx Location of sshd patched with authorized_keys_script],

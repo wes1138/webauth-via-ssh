@@ -8,7 +8,7 @@ config=@NGINX_CONF_DIR@/nginx.conf
 fcgimain="main.fcgi"
 keyfile="/tmp/.webtoken-key"  # XXX
 if [[ $1 == 'stop' ]]; then
-	nginx -c "$config" -s stop
+	@NGINX_BIN@ -c "$config" -s stop
 	pkill -x "$fcgimain"
 elif [[ $1 == 'clean' ]]; then
 	[[ -f @NGINX_TMP_DIR@/nginx.pid ]] && \
@@ -19,6 +19,6 @@ elif [[ $1 == 'clean' ]]; then
 else
 	[[ ! -f "$keyfile" ]] && head -c 64 < /dev/urandom > "$keyfile"
 	mkdir -p @NGINX_TMP_DIR@
-	spawn-fcgi -s@NGINX_TMP_DIR@/fcgi-sock -n ./fcgi/$fcgimain &
-	nginx -c "$config"
+	@SPAWN_FCGI@ -s@NGINX_TMP_DIR@/fcgi-sock -n ./fcgi/$fcgimain &
+	@NGINX_BIN@ -c "$config"
 fi
