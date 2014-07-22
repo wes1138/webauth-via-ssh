@@ -22,7 +22,7 @@ window.onload = function() {
 			document.getElementById("msgrecvd").value =
 				"Token acquired :D\n" + token;
 			// set the cookie:
-			document.cookie = "auth-token=" + token + "; max-age=1800";
+			document.cookie = "auth-token=" + token + "; max-age=1800"; /* + ";secure" */
 			/* TODO: and now redirect to the main page... */
 		} else if (token.substring(0,2) == "AQ") {
 			document.getElementById("msgrecvd").value =
@@ -34,14 +34,6 @@ window.onload = function() {
 			document.getElementById("msgrecvd").value =
 				"Server error x_x";
 		}
-		// XXX: after debugging (or setting up certificates on
-		// localhost), you will want to add the secure flag:
-		// document.cookie = "auth-token=" + token + "; secure";
-		// TODO: set expires so that the cookie lasts longer
-		// than a single session?  Or, have the browser replace this
-		// token with an httponly / secure cookie immediately.  I think
-		// that is the best policy.  That one must have expires set,
-		// but the question of how long to make it last is still debatable.
 	};
 	reader.onerror = function(e) {
 		document.getElementById("msgrecvd").value =

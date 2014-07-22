@@ -1,5 +1,5 @@
 /*
- * Simple program to acquire authentication tokens from a server.
+ * Simple websocket server to acquire authentication tokens via ssh.
  *
  * Outline:
  * 1. an input of the form user@host:port is received via websockets
@@ -37,50 +37,9 @@
 
 static volatile int force_exit = 0;
 
-/* NOTE:  this code calls popen.  Naively, the command argument might
- * contain input from the websocket.  A random-ass website having control
- * over the input to popen sounds sub-optimal.  Instead, we construct a
- * config file for ssh out of the request, and invoke ssh via popen with
- * "ssh -F tempfile webauth" as the command, which looks more innocuous.
- * A nasty website may still attempt to place malicious data in the config
- * file, but the ssh_config format is simple (one option per line), and the
- * few strings written to the config file are sanitized.  At worst, I think
- * a malicious input would just result in a failed ssh connection, but I
- * suppose to say anything with certainty, the openssh source would have to
- * be consulted.
- *
- * To combat the XSS/CSRF type attacks in which a malicious website tries to
- * acquire tokens for a different domain, we force the host to be the host
- * specified in the 'Origin' header, and accept only the username and port
- * as parameters (both of which are sanitized, of course).  These are set by
- * your browser, out of reach of any scripts the browser is executing.  It
- * may also be desirable to implement a white-list of domains.
- *
- * The only remaining issue I can see is the potential for another user
- * on your own system to acquire tokens.  At the moment, this issue is
- * outstanding, although it would be quite easily remedied if we could run
- * the websocket protocol over a unix domain socket.  There's really nothing
- * standing in our way, other than the lack of an accepted url scheme for
- * specifying a local socket.  If/when that comes about, this should be
- * essentially as secure as the usual ssh-agent.
- * */
-
-#if 0
-/* temp file will look something like this (but is written inline below
- * so we can use -Wformat=2 without triggering warnings) */
-static const char* sshconf =
-"Host webauth"
-"	HostName = %s\n"
-"	User	 = %s\n"
-"	Port	 = %s\n"
-"	UserKnownHostsFile	= ~/.ssh/web-knownhosts\n"
-"	StrictHostKeyChecking = no\n";
-/* Note that HostName will be filled in from the 'origin' header,
- * and not from any input. */
-#endif
-
 static char tfname[64] = "/tmp/.web-sshconf-XXXXXX";
 static char keyfile[128] = "";
+static char knownhostfile[128] = "~/.ssh/web-knownhosts";
 
 enum req_states {
 	rq_start,         /* connection just opened */
@@ -96,11 +55,6 @@ struct per_session_data__auth {
 	unsigned int len;
 	unsigned int state;
 };
-
-/* NOTE: do we want to forward the username for the web service also?
- * This is not needed in the case of plain token generation, but might
- * be good for looking up keys, or for signup?  However, we can make
- * the signup via a static file for now.  Outside the scope? */
 
 /* store the origin header, and the corresponding websocket: */
 char origin[1024]; /* who is connecting to us? */
@@ -207,19 +161,6 @@ callback_acquire(struct libwebsocket_context *context,
 		citem[len-1] = 0;  /* make sure input is a c-string */
 
 #define nparams 2
-		/* XXX also a little tricky is that if the origin is https://, you
-		 * can only connect to wss:// which is a little annoying: you don't
-		 * want to have to manage certificates just for this, and it is also
-		 * strange to run ssl over a unix socket (your eventual plan is that
-		 * all this happens on a socket rather than tcp).
-		 * http://unix.stackexchange.com/questions/33067/tls-over-unix-pipe
-		 * Anyway, for now I think something like this is fine:
-		 * get the token over plain http + ws:// but make sure the page does
-		 * not actually *use* that token over http.  Seems kind of backwards
-		 * from how stuff usually goes, but not a security issue.  Moreover,
-		 * you can (I think) still set the secure flag for the cookie (if you
-		 * go that route) to prevent it being sent non-ssl.
-		 * */
 		char* hostname; /* we get this from origin header. */
 		char *username, *port;
 		char* labels[nparams] = { "user:","port:" };
@@ -244,15 +185,15 @@ callback_acquire(struct libwebsocket_context *context,
 		}
 
 		/* get hostname from origin. */
-		if (wsi != origin_ws) {
-			fprintf(stderr, "======> wsi struct changed before callback\n");
-		}
 		/* XXX XXX XXX
 		 * The origin token has at this point been cleared.  So we have
 		 * to record it in the FILTER_PROTOCOL above.  But then we also
 		 * need to make sure the recorded version corresponds to the same
 		 * connection as this one... :\ not very convenient.
 		 * */
+		if (wsi != origin_ws) {
+			fprintf(stderr, "======> wsi struct changed before callback\n");
+		}
 		/* for local host (mainly used for debugging), webkit sets origin
 		 * to file://, and firefox sets origin to be "null". */
 		if (!strncmp(origin,"file://",7) ||
@@ -349,9 +290,9 @@ callback_acquire(struct libwebsocket_context *context,
 				"	HostName = %s\n"
 				"	User	 = %s\n"
 				"	Port	 = %s\n"
-				"	UserKnownHostsFile	= ~/.ssh/web-knownhosts\n"
+				"	UserKnownHostsFile	= %s\n"
 				"	StrictHostKeyChecking = no\n",
-				hostname,username,port);
+				hostname,username,port,knownhostfile);
 		if (keyfile[0]) {
 			fprintf(tsshconf,
 				"	IdentityFile = %s\n", keyfile);
@@ -361,8 +302,6 @@ callback_acquire(struct libwebsocket_context *context,
 		 * same tempfile, irrespective of the connection. */
 
 		char command[128];
-		/* XXX for testing, we do this: */
-		// sprintf(command,"ssh -F '%s' webauth /tmp/token-gen -u lolol",tfname);
 		sprintf(command,"ssh -F '%s' webauth",tfname);
 		fprintf(stderr, "Running command: %s\n",command);
 		unsigned char* token =
@@ -446,6 +385,7 @@ static struct option long_opts[] = {
 	{ "debug",	required_argument,	NULL, 'd' },
 	{ "port",	required_argument,	NULL, 'p' },
 	{ "keyfile",	required_argument,	NULL, 'k' },
+	{ "knownhosts",	required_argument,	NULL, 'K' },
 	{ "interface",  required_argument,	NULL, 'i' },
 	{ "daemonize", 	no_argument,		NULL, 'D' },
 	{ NULL, 0, 0, 0 }
@@ -467,7 +407,7 @@ int main(int argc, char **argv)
 
 	char c;
 	int opt_index = 0;
-	while ((c = getopt_long(argc, argv, "hd:k:p:i:D", long_opts,
+	while ((c = getopt_long(argc, argv, "hd:k:p:i:DK:", long_opts,
 					&opt_index)) != -1) {
 		switch (c) {
 		case 'D':
@@ -484,6 +424,10 @@ int main(int argc, char **argv)
 			strncpy(keyfile,optarg,sizeof(keyfile));
 			keyfile[sizeof(keyfile)-1] = 0;
 			break;
+		case 'K':
+			strncpy(knownhostfile,optarg,sizeof(knownhostfile));
+			knownhostfile[sizeof(knownhostfile)-1] = 0;
+			break;
 		case 'i':
 			strncpy(interface_name, optarg, sizeof interface_name);
 			interface_name[(sizeof interface_name) - 1] = '\0';
@@ -495,13 +439,15 @@ int main(int argc, char **argv)
 				"Usage: %s [OPTIONS]...\n"
 				"Websocket-speaking daemon to acquire authentication tokens\n"
 				"from compatible websites.\n\n"
-				"   -p,--port    NUM     listen on port NUM.\n"
-				"   -d,--debug   NUM     set debug level to NUM.\n"
-				"   -k,--keyfile FILE    specify IdentityFile for ssh.\n"
-				"   --help             show this message and exit.\n",
-					argv[0]);
-			/* XXX interface and daemonize options? */
-			/* XXX should add parameters for file locations, too */
+				"   -p,--port       NUM     listen on port NUM. (default:%i)\n"
+				"   -d,--debug      NUM     set debug level to NUM.\n"
+				"   -k,--keyfile    FILE    specify IdentityFile for ssh.\n"
+				"   -K,--knownhosts FILE    specify special ssh known_hosts file\n"
+				"                           to store host keys acquired by authd\n"
+				"                           (defaults to %s)\n"
+				"   -D,--daemonize          run in background.\n"
+				"   --help                  show this message and exit.\n",
+					argv[0],listen_port,knownhostfile);
 			exit(1);
 		}
 	}

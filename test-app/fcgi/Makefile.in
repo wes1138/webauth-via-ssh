@@ -31,13 +31,10 @@ debug : all
 .PHONY : restart
 restart : $(TARGET)
 	pkill -x $(TARGET) || echo "service was not running."
-	spawn-fcgi -a127.0.0.1 -p9000 -n ./$(TARGET) &
+	spawn-fcgi -s@NGINX_TMP_DIR@/fcgi-sock -n ./$(TARGET) &
 
 $(TARGET) : test.o b64dec.o
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDADD)
-
-$(HELLO) : hello.o
-	$(CC) $(LDFLAGS) -o $@ $^ $(LDADD)
 
 %.o : %.cpp $(HEADERS)
 	$(CXX) $(DEFS) $(INCLUDE) $(CXXFLAGS) -c $< -o $@

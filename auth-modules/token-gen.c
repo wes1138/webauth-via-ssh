@@ -65,10 +65,10 @@ int main(int argc, char *argv[]) {
 				printf("Usage: %s [OPTIONS]...\n"
 					"Generate authentication tokens.\n\n"
 					"   -u,--user  USER    generate token for user USER.\n"
-					"   -k,--key   FILE    read key from FILE.\n"
+					"   -k,--key   FILE    read key from FILE. (default:%s)\n"
 					"   -t,--text          output in a human-readable format.\n"
 					"   --help             show this message and exit.\n",
-						argv[0]);
+						argv[0],keyfile);
 				return (c == 'h') ? 0 : misc_badness;
 		}
 	}

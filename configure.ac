@@ -5,7 +5,6 @@ AC_PREREQ([2.69])
 AC_INIT([webauth-via-ssh], [0.1], [])
 dnl AC_CONFIG_SRCDIR([test-app/fcgi/b64dec.c])
 dnl AC_CONFIG_HEADERS([config.h])
-# not sure if we need above.
 
 AC_PROG_CC
 AC_PROG_CXX
@@ -154,14 +153,11 @@ AC_SUBST([NGINX_CONF_DIR])
 AC_SUBST([AUTH_MODULES_DIR])
 AC_SUBST([TEST_APP_DIR])
 
-dnl AC_OUTPUT would create all of the following using variable
-dnl substitution: each @VAR@ occurence in "blah.in" would be replaced
-dnl by the contents of some shell variable VAR in file "blah".
-dnl So be careful with that.
+dnl file list for AC_OUTPUT:
 AC_CONFIG_FILES([auth-modules/Makefile
-                 ssh-conf/start-sshd.sh
+				 ssh-conf/start-sshd.sh
 				 ssh-conf/Makefile
-                 test-app/fcgi/Makefile
+				 test-app/fcgi/Makefile
 				 test-app/html/login.html
 				 test-app/startnginx.sh
 				 test-app/nginx/nginx.conf
@@ -170,6 +166,7 @@ AC_OUTPUT
 
 dnl make scripts executable:
 chmod +x ssh-conf/start-sshd.sh test-app/startnginx.sh
+dnl NOTE: ./config.status doesn't re-do this step.
 
 if test -z "$PATCHEDSSHD" ; then
 	AC_MSG_WARN([server depends on a patched version sshd, available here:
