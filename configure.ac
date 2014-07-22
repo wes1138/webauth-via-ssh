@@ -153,20 +153,21 @@ AC_SUBST([NGINX_CONF_DIR])
 AC_SUBST([AUTH_MODULES_DIR])
 AC_SUBST([TEST_APP_DIR])
 
-dnl file list for AC_OUTPUT:
-AC_CONFIG_FILES([auth-modules/Makefile
-				 ssh-conf/start-sshd.sh
-				 ssh-conf/Makefile
-				 test-app/fcgi/Makefile
-				 test-app/html/login.html
-				 test-app/startnginx.sh
-				 test-app/nginx/nginx.conf
-				 Makefile])
-AC_OUTPUT
+m4_define([conf_gen_files],[auth-modules/Makefile
+							ssh-conf/Makefile
+							test-app/fcgi/Makefile
+							test-app/html/login.html
+							test-app/nginx/nginx.conf
+							Makefile])
+AC_CONFIG_FILES(conf_gen_files)
+m4_define([conf_gen_scripts],[ssh-conf/start-sshd.sh test-app/startnginx.sh])
+m4_define([ADD_CONFIG_FILE_EXEC], [AC_CONFIG_FILES([$1], [chmod +x $1])])
+m4_map_args_w(conf_gen_scripts, [ADD_CONFIG_FILE_EXEC(], [)])
+dnl now save list for distclean
+CONFIG_GEN_FILES="m4_normalize(conf_gen_scripts conf_gen_files)"
+AC_SUBST([CONFIG_GEN_FILES])
 
-dnl make scripts executable:
-chmod +x ssh-conf/start-sshd.sh test-app/startnginx.sh
-dnl NOTE: ./config.status doesn't re-do this step.
+AC_OUTPUT
 
 if test -z "$PATCHEDSSHD" ; then
 	AC_MSG_WARN([server depends on a patched version sshd, available here:
