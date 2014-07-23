@@ -60,15 +60,15 @@ application.
 
 ### Web Application
 
-Upon your first visit, a page with some of the server's ssh info is displayed.
-Press the button to get a token (this will happen via ssh).  If this looks
-successful, refresh the page, and you will be authenticated and directed to
-your private part of the application.  You can enter text and save it, and it
-will be there for you later (unless you restart the server -- everything is in
-RAM only).  Try it out: close the browser and come back, or clear the tab and
-reload the application in a new one.  You should be given access to your text
-immediately, with no password required.  **This is the main point:** we
-replace passwords (annoying) with ssh public key authentication (awesome).
+The "application" just saves some text data for each user and allows them to
+edit it.  Upon first loading the page, an attempt will be made to authenticate
+you via your ssh public key.  (**NOTE:** if your public key is unknown to the
+server, it will make a new account for you automatically.)  The authentication
+cookie obtained via ssh is a session cookie, but also will be rejected after
+30 minutes.  So, you won't see ssh in action again unless you wait a while, or
+close the browser and come back (or manually delete the cookie).  Anyhow,
+**the main point:** this proposal replaces passwords (annoying) with ssh
+public key authentication (awesome).
 
 
 Documentation
