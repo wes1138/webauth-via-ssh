@@ -5,20 +5,17 @@ var ssh_port = "@PATCHED_SSHD_PORT@";
 var lindex = 0;
 window.onload = function() {
 	websock = new WebSocket("ws://localhost:7681/");
-	logThis("connecting to local websocket ws://localhost:7681...");
+	logThis("websocket:: connecting to ws://localhost:7681...");
 	websock.onopen = function(e) {
-		logThis("attempting ssh authentication " +
-				"for " + ssh_user + "@" + document.location.hostname +
-				":" + ssh_port + "...","complete");
-		//document.getElementById("rqbutton").disabled=false;
+		logThis("ssh:: authenticating " +
+				ssh_user + "@" + document.location.hostname + ":" + ssh_port +
+				"...","complete");
 		websock.send("user:" + ssh_user + "\nport:" + ssh_port + "\n");
 		/* NOTE: trailing newline is actually necessary */
 	}
 	websock.onclose = function(e) {
-		/* TODO: we should keep some state to figure out if closing
-		 * was a bad thing, or an expected thing.  For now, we assume
-		 * it was bad. */
 		logThis("connection to localhost:7681 closed.");
+		/* For now, we assume this is always a bad thing */
 		setLogEntryStatus("failed");
 	}
 	websock.onmessage = function(e) {
@@ -36,13 +33,19 @@ window.onload = function() {
 			/* NOTE: "token" actually contained a 3-byte return code
 			 * and the token.  3 bytes = 24 bits = 6*4, so we remove
 			 * 4 characters of base64 to get just the token.  */
-			logThis("authentication successful","complete");
-			logThis("logging in...","complete");
+			logThis("logging in","complete");
+			/* XXX stuff happens fast, so we waste some time, giving the
+			 * user a chance to read the messages: */
+			for (var i = 0; i < 9; i++) {
+				setTimeout(function(){
+					var ln = document.getElementById("log_entry" + (lindex-1));
+					ln.innerHTML += ".";
+				}, i*300);
+			}
 			/* set the cookie: */
 			document.cookie = "auth-token=" + token; /* + "; max-age=1800;secure"; */
-			/* and now redirect to the main page... which for now is the same
-			 * page.  Messages go by fast, so we pause a moment: */
-			setTimeout(function(){location.reload(true);},2300);
+			/* and now redirect to the main page, or reload if this is it. */
+			setTimeout(function(){location.reload(true);},2800);
 		} else if (token.substring(0,2) == "AQ") {
 			logThis("Public key rejected by server","failed");
 			setLogEntryStatus("failed");
