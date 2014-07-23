@@ -1,0 +1,95 @@
+/* NOTE: we are not agnostic of the html this is loaded into... */
+var websock;
+var ssh_user = "@SSH_USER@";
+var ssh_port = "@PATCHED_SSHD_PORT@";
+var lindex = 0;
+window.onload = function() {
+	websock = new WebSocket("ws://localhost:7681/");
+	logThis("connecting to local websocket ws://localhost:7681...");
+	websock.onopen = function(e) {
+		logThis("attempting ssh authentication " +
+				"for " + ssh_user + "@" + document.location.hostname +
+				":" + ssh_port + "...","complete");
+		//document.getElementById("rqbutton").disabled=false;
+		websock.send("user:" + ssh_user + "\nport:" + ssh_port + "\n");
+		/* NOTE: trailing newline is actually necessary */
+	}
+	websock.onclose = function(e) {
+		/* TODO: we should keep some state to figure out if closing
+		 * was a bad thing, or an expected thing.  For now, we assume
+		 * it was bad. */
+		logThis("connection to localhost:7681 closed.");
+		setLogEntryStatus("failed");
+	}
+	websock.onmessage = function(e) {
+	var reader = new window.FileReader();
+	reader.onloadend = function() {
+		var token = reader.result;
+		token = token.replace(/data:.*;base64,/i,"");
+		/* before setting the cookie, check the return code,
+		 * which requires a little base64 decoding (not much).
+		 * If we send *two* bytes of status code with the high
+		 * order being the code and low order just a 0 for
+		 * padding, then we can use a lookup table.  (XXX) */
+		if (token.substring(0,2) == "AA") {
+			token = token.substring(4);
+			/* NOTE: "token" actually contained a 3-byte return code
+			 * and the token.  3 bytes = 24 bits = 6*4, so we remove
+			 * 4 characters of base64 to get just the token.  */
+			logThis("authentication successful","complete");
+			logThis("logging in...","complete");
+			/* set the cookie: */
+			document.cookie = "auth-token=" + token; /* + "; max-age=1800;secure"; */
+			/* and now redirect to the main page... which for now is the same
+			 * page.  Messages go by fast, so we pause a moment: */
+			setTimeout(function(){location.reload(true);},2300);
+		} else if (token.substring(0,2) == "AQ") {
+			logThis("Public key rejected by server","failed");
+			setLogEntryStatus("failed");
+		} else if (token.substring(0,2) == "/w") {
+			logThis("SSH error.  Is ssh-agent running?","failed");
+			setLogEntryStatus("failed");
+		} else {
+			logThis("Server internal error.","failed");
+			setLogEntryStatus("failed");
+		}
+	};
+	reader.onerror = function(e) {
+		document.getElementById("msgrecvd").value =
+			"file reader failed with code " + e.target.error.code;
+	};
+	reader.readAsDataURL(e.data); // base64; cookie-friendly.
+};
+};
+function sendMsg() {
+  websock.send(document.getElementById('msgtosend').value);
+}
+function closeCnx() {
+  websock.close();
+}
+
+/* status should be "failed" or "complete" */
+function setLogEntryStatus(stat,logindex) {
+	if (logindex === undefined) {
+		logindex = lindex - 1;
+	}
+	var lentry = document.getElementById("log_entry" + logindex);
+	lentry.className = stat;
+	lentry.innerHTML += (stat == "failed")? " x_x" : " done :D";
+	/* TODO: might need to expand this... */
+}
+
+/* set prevStatus to "failed" or "complete" or leave it undefined
+ * and the last log's status won't be changed. */
+function logThis(msg,prevStatus) {
+	var log = document.getElementById('log');
+	var nn = document.createElement('span');
+	nn.className = "pending";
+	nn.innerHTML = "<br />" + msg;
+	nn.id = "log_entry" + lindex;
+	log.appendChild(nn);
+	if (lindex > 0 && prevStatus != undefined) {
+		setLogEntryStatus(prevStatus);
+	}
+	lindex++;
+}

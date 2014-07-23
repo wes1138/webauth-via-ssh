@@ -167,7 +167,7 @@ AC_SUBST([TEST_APP_DIR])
 m4_define([conf_gen_files],[auth-modules/Makefile
 							ssh-conf/Makefile
 							test-app/fcgi/Makefile
-							test-app/html/login.html
+							test-app/js/ssh-login.js
 							test-app/nginx/nginx.conf
 							Makefile])
 AC_CONFIG_FILES(conf_gen_files)

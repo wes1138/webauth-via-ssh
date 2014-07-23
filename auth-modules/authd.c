@@ -39,7 +39,7 @@ static volatile int force_exit = 0;
 
 static char tfname[64] = "/tmp/.web-sshconf-XXXXXX";
 static char keyfile[128] = "";
-static char knownhostfile[128] = "~/.ssh/web-knownhosts";
+static char knownhostfile[128] = "~/.ssh/known_hosts-web";
 
 enum req_states {
 	rq_start,         /* connection just opened */

@@ -1,3 +1,3 @@
 startnginx.sh
-html/login.html
 nginx/nginx.conf
+js/ssh-login.js
