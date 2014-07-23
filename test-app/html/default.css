@@ -1,0 +1,16 @@
+
+body {font-family:Gill Sans MT; font-size:larger; color:#657b83; background-color:#fdf6e3;}
+h2 {margin-bottom:0px; padding-bottom:0px;}
+a:link {color:#859900}
+a:visited {color:#6c71c4}
+a:hover {color:#268bd2}
+a:active {color:#d33682}
+
+.pending{color:#6c71c4; font-style:italic; font-weight:bold;}
+.complete{color:#859900;}
+.failed{color:#dc322f; font-weight:bolder;}
+.plain{}
+.emph2{color:#6c71c4; font-weight:bolder;}
+.emph{color:#859900; font-weight:bolder;}
+
+textarea {background-color:#eee8d5; color:#586e75; font-family:Gill Sans MT; font-weight:bolder;}

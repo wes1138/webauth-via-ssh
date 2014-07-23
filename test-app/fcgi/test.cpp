@@ -242,6 +242,7 @@ int main(void)
 				"<html xmlns=\"http://www.w3.org/1999/xhtml\">"
 				"<head>\n"
 				"<title>SSH for the web: test page</title>\n"
+				"<link rel=\"stylesheet\" type=\"text/css\" href=\"/html/default.css\" />\n"
 				"<script type=\"text/javascript\" src=\"/js/post-text.js\"></script>"
 				"</head><body>\n"
 				"<h1>SSH Test</h1>\n"

@@ -72,9 +72,9 @@ http {
             root   @TEST_APP_DIR@;
         }
 
-        # location /html {
-        #   root   @TEST_APP_DIR@;
-        # }
+        location /html {
+          root   @TEST_APP_DIR@;
+        }
 
         #error_page  404              /404.html;
 
