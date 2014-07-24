@@ -1,0 +1,115 @@
+Design Notes
+============
+
+Outline
+-------
+
+In what follows, we will reference this diagram of the modules:
+
+
++--------------------------+        +----------------------+                                        
+|                          |        |                      |          +-------------+               
+|                          |        |     fcgi server      | <------> |   tokend    |               
+|          httpd           | <----> |    (or similar...)   |          +-------------+               
+|                          |        |                      |                                        
+|                          |        |                      |                                        
+|                          |        |                      |          +-------------+               
+|                          |        |                      |          |    sshd     |               
++--------------------------+        +----------------------+          +-------------+               
+                  ^                                                          ^                       
+^^^ server        |                                                          |
++-------------------------------------------------------------------------------------+
+vvv client        |                                                          |                         
+                  v                                                          |                        
++--------------------------+         +----------------------+                |                        
+|                          |         |                      |                |                        
+|                          |         |                      |                v                        
+|    browser               |         |                      |         +--------------+               
+|                          |         |         authd        |         |              |               
+|             +-------+    |         |                      | <-----> |     ssh      |               
+|             | js    | <--|-------->|                      |         |              |               
+|             | code  |    |         |                      |         +--------------+               
+|             +-------+    |         |                      |         
+|                          |         |                      |                                         
++--------------------------+         +----------------------+                                         
+
+                       Figure 1: diagram of modules.
+
+
+The interaction is as follows:
+
+1.  Browser requests content from a "restricted" part of the site, for which
+	he/she must be authenticated.
+2.  fcgi/httpd deliver a page containing some javascript, and a username /
+	port combination for a special-purpose sshd they have running.  *NOTE:*
+	they do **not** supply the hostname!  See step (4).
+3.  The js code attempts to connect to a websocket, *running on the
+	localhost*, and sends the username / port over the wire.  Denote this
+	username by "ssh_user".
+4.  The local websocket server (named authd above) reads ssh_user / port, and
+	obtains the hostame from the *ORIGIN header* sent in the websocket
+	protocol.  As related by http://tools.ietf.org/html/rfc6455#section-10.2,
+	the origin header is used to
+
+		...ensure that trusted browsers under the control of potentially
+		malicious JavaScript cannot fake a WebSocket handshake.
+
+	This prevents a malicious site from attempting to trick authd into
+	authenticating to some other website.
+5.  authd (carefully) invokes the user's ssh program, connecting to
+	"ssh_user@origin" on the given port.
+6.  The specially configured sshd on the server takes the supplied public key
+	and attempts to locate the corresponding user in a database.  Should this
+	fail, sshd will reject the connection (invalid user).  Else, normal ssh
+	authentication continues.  If successful, sshd will run tokend with the
+	username retrieved from the database as a parameter.  Denote this username
+	by "web_user".
+7.  Based on a secret key (call it K_token), tokend outputs an authentication
+	token for web_user.
+8.  The token from (7) is returned to authd via ssh, and relayed back to the
+	javascript running in the browser via the websocket.
+9.  The javascript code forms an authentication cookie based on the token, and
+	redirects the browser back to the initially requested page from (1).
+10. The fcgi server reads the authentication token from the cookie string,
+	checks the validity using tokend, and serves the restricted content if
+	that succeeds.
+
+
+Security Argument
+-----------------
+
+TODO...
+
+
+Remarks
+~~~~~~~
+
+The current prototype makes a number of simplifications, and as such is
+**not** secure in its current state!  It leaves out elements which are both
+(a) relatively simple to implement, and (b) negatively impact ease of testing
+/ experimentation.  For example, the restricted part of the web service should
+be served over TLS, but this is not done, since most users running the code
+locally do not have valid certificates.
+
+
+Other approaches
+----------------
+
+Another approach we have considered in the past, was to use client-side
+certificates to achieve cryptographically strong, password-less
+authentication.  Client certificates are built right into the TLS protocol, so
+it all seemed very promising.  However in practice, a number of issues detract
+from this approach:
+
+1. Most clients do not have certificates, and if they do, they are very seldom
+   signed by a trusted authority.
+2. Configuring web servers to request certificates is somewhat tricky, and not
+   always possible; configuring them to accept self-signed certificates is
+   much worse, and may negatively impact security in other parts of the
+   system.
+
+Public key infrastructure just isn't the right model for this application.
+Much better suited, is the "web of trust" concept used by SSH.
+
+
+# vim:syntax=rst

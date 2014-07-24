@@ -5,6 +5,7 @@ Overview
 --------
 
 A proof of concept for using ssh public keys to authenticate to web services.
+See doc/design-notes.txt for the high-level ideas.
 
 Dependencies
 ------------
@@ -74,28 +75,13 @@ public key authentication (awesome).
 Documentation
 -------------
 
-Will be forthcoming...
+See doc/design-notes.txt.
 
 TODO
 ----
 
 * Token generating / verifying should be in one module.
 * Most errors are handled un-gracefully.
-* More configurability.
-
-Caveats
--------
-
-Since this project is a *proof of concept*, attempts have been made to keep it
-*as simple as possible* so as not to obscure the core ideas.  Consequently,
-some important issues have been intentionally ignored, as long as it is clear
-how one would address such issues in real applications.  For example, the
-authentication cookie acquired via the ssh interaction will not have
-`HttpOnly` or `Secure` flags set.  For toying around with this, it is annoying
-to have to set up certificates, and the application logic can be kept simpler
-if we just use the original cookie.  In real applications, the initial cookie
-could of course be sent to an `https://` url and immediately swapped for a new
-token with the above flags set.
 
 
 [OpenSSH]: http://www.openssh.com/
