@@ -1,8 +1,55 @@
+============
 Design Notes
 ============
 
-Outline
--------
+High-level Description + Remarks
+================================
+
+To avoid forcing users to re-authenticate every request to restricted portions
+of a site, a password is typically used to obtain a short-lived authentication
+token (in a session cookie, perhaps) that proves the user's identity for
+subsequent requests in a session.  We follow this same paradigm, but with
+public key authentication in place of passwords for obtaining the tokens.
+
+In a little more detail, the usual username / password page that would issue
+such tokens is replaced by a small javascript program that interacts with the
+localhost (via websockets) to obtain authentication tokens, which are
+ultimately delivered by the system's native ssh.  See Figure 1 below.
+
+You may be thinking, "hey, many programs make use of ssh for authentication
+already (for example git and other versioning systems, rsync, scp, curl...),
+so why all the fuss here?  Why isn't this trivial?"  The main difficulty is
+that all the programs on that list are assumed to be *trusted agents* which do
+your bidding.  The browser is a slightly different animal, as it is constantly
+executing unaudited javascript code from the depths of the internet.  As such,
+that javascript code runs in a sandbox, and cannot interact much with your
+system -- in particular, it can't talk to ssh-agent.  To solve this problem,
+we construct a local websocket server (see `authd` in Figure 1).
+
+Client Security
+---------------
+
+The prospect of poking a hole in the browser's sandbox might raise some
+eyebrows.  Indeed, this should be heavily scrutinized.  At present, `authd`
+listens (on loopback) for connections, carefully inspects the data it is
+given, and invokes ssh for you in a manner that (as we hope to argue) shall
+cause you no harm, irrespective of the javascript code that is talking to it.
+The current protocol is very simple (`authd.c` is only 500 lines of C), and
+should be amenable to analysis.
+
+Server Security
+---------------
+
+As the proposition calls for myriad users to be able to ssh to the server
+hosting the web service, both security and efficiency are clear concerns on
+the server side.  Regarding security, we run a separate instance of sshd,
+which can be thoroughly locked down, and if desired, run inside of a chroot.
+Regarding efficiency, we employ a hack developed for github to efficiently
+multiplex many users of the web service through a single account on the host.
+
+
+Details
+=======
 
 In what follows, we will reference this diagram of the modules:
 
@@ -25,8 +72,8 @@ vvvclient   |                                                        |
 |                    |        |                      |               |        
 |  browser           |        |                      |        +--------------+
 |                    |        |        authd         |        |              |
-|       +-------+    |        |                      | <----> |     ssh      |
-|       | js    | <--|------->|                      |        |              |
+|       +-------+    |        |  (websocket server)  | <----> |     ssh      |
+|       | js    | <--|------> |                      |        |              |
 |       | code  |    |        |                      |        +--------------+
 |       +-------+    |        |                      |        
 +--------------------+        +----------------------+                        
@@ -74,13 +121,13 @@ The interaction is as follows:
 
 
 Security Argument
------------------
+=================
 
 TODO...
 
 
 Remarks
-~~~~~~~
+=======
 
 The current prototype makes a number of simplifications, and as such is
 **not** secure in its current state!  It leaves out elements which are both
@@ -91,7 +138,7 @@ locally do not have valid certificates.
 
 
 Other approaches
-----------------
+================
 
 Another approach we have considered in the past, was to use client-side
 certificates to achieve cryptographically strong, password-less
